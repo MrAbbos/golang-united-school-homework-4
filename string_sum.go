@@ -26,62 +26,49 @@ var (
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
 func StringSum(input string) (output string, err error) {
-	input = strings.TrimSpace(input)
-	input = strings.ReplaceAll(input, " ", "")
-
-	if input == "" {
-		return "", fmt.Errorf("%w", errorEmptyInput)
-	}
-
 	all := strings.Split(input, "")
-	if len(all) < 3 || len(all) > 4 {
-		return "", fmt.Errorf("%w", errorNotTwoOperands)
-	}
-	first := 0
-	second := 0
-	ans := 0
-	if v, err := strconv.Atoi(all[0]); err == nil {
-		first += v
-		if all[1] == "+" {
-			if v, err := strconv.Atoi(all[2]); err == nil {
-				ans = first + v
-				second += v
 
-			} else {
-				fmt.Println("error")
-			}
-		} else if all[1] == "-" {
-			if v, err := strconv.Atoi(all[2]); err == nil {
-				ans = first - v
-				second -= v
-			} else {
-				fmt.Println("error")
-			}
+	var result []string
+	for i := 0; i < len(all); i++ {
+		if all[i] == " " {
+			continue
 		}
-	} else if all[0] == "-" {
-		if v, err := strconv.Atoi(all[1]); err == nil {
-			first -= v
-			if all[1] == "+" {
-				if v, err := strconv.Atoi(all[2]); err == nil {
-					ans = first + v
-					second += v
-				} else {
-					return "", fmt.Errorf("bad %w", err)
-				}
-			} else if all[2] == "-" {
-				if v, err := strconv.Atoi(all[3]); err == nil {
-					ans = first - v
-					second -= v
-				} else {
-					return "", fmt.Errorf("bad %w", err)
-				}
-			}
-		} else {
-			return "", fmt.Errorf("bad %w", err)
+		if all[i] == "+" {
+			all[i] = "/"
+			result = append(result, all[i])
+			continue
 		}
-	} else {
+		if all[i] == "-" {
+			all[i] = "/-"
+		}
+		result = append(result, all[i])
+	}
+	input = strings.Join(result, "")
+	all = strings.Split((input), "/")
+	result = nil
+	for i := 0; i < len(all); i++ {
+		if all[i] == "" {
+			copy(all[i:], all[i+1:])
+			all[len(all)-1] = ""
+			all = all[:len(all)-1]
+		}
+		result = append(result, all[i])
+	}
+	a, err := strconv.Atoi(result[0])
+	if err != nil {
 		return "", fmt.Errorf("bad %w", err)
 	}
-	
-	return fmt.Sprint(strconv.Itoa(ans)), nil
+
+	b, err := strconv.Atoi(result[1])
+	if err != nil {
+		return "", fmt.Errorf("bad %w", err)
+	}
+	if len(result) < 2 {
+		return "", fmt.Errorf("%w", errorNotTwoOperands)
+	}
+	if len(result) > 2 {
+		return "", fmt.Errorf("%w", errorNotTwoOperands)
+	}
+	output = fmt.Sprint(strconv.Itoa(a + b))
+	return output, nil
 }
