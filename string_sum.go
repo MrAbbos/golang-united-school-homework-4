@@ -3,6 +3,7 @@ package string_sum
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -25,63 +26,30 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func StringSum(input string) (output string, err error) {
-	input = strings.TrimSpace(input)
-	input = strings.ReplaceAll(input, " ", "")
+const invalidOperandMsg = "Got invalid operand %w"
 
-	if input == "" {
+func StringSum(input string) (output string, err error) {
+	input = strings.ReplaceAll(input, " ", "")
+	if len(input) == 0 {
 		return "", fmt.Errorf("%w", errorEmptyInput)
 	}
 
-	all := strings.Split(input, "")
-	if len(all) < 3 || len(all) > 4 {
+	res := regexp.MustCompile(`[+-]?\d+[^+-]`).FindAllString(input, -1)
+	fmt.Println(res)
+
+	if len(res) != 2 {
 		return "", fmt.Errorf("%w", errorNotTwoOperands)
 	}
-	first := 0
-	second := 0
-	ans := 0
-	if v, err := strconv.Atoi(all[0]); err == nil {
-		first += v
-		if all[1] == "+" {
-			if v, err := strconv.Atoi(all[2]); err == nil {
-				ans = first + v
-				second += v
 
-			} else {
-				fmt.Println("error")
-			}
-		} else if all[1] == "-" {
-			if v, err := strconv.Atoi(all[2]); err == nil {
-				ans = first - v
-				second -= v
-			} else {
-				fmt.Println("error")
-			}
-		}
-	} else if all[0] == "-" {
-		if v, err := strconv.Atoi(all[1]); err == nil {
-			first -= v
-			if all[1] == "+" {
-				if v, err := strconv.Atoi(all[2]); err == nil {
-					ans = first + v
-					second += v
-				} else {
-					return "", fmt.Errorf("bad %w", err)
-				}
-			} else if all[2] == "-" {
-				if v, err := strconv.Atoi(all[3]); err == nil {
-					ans = first - v
-					second -= v
-				} else {
-					return "", fmt.Errorf("bad %w", err)
-				}
-			}
-		} else {
-			return "", fmt.Errorf("bad %w", err)
-		}
-	} else {
-		return "", fmt.Errorf("bad %w", err)
+	firstOperand, err := strconv.Atoi(strings.TrimSpace(res[0]))
+	if err != nil {
+		return "", fmt.Errorf(invalidOperandMsg, err)
 	}
-	
-	return fmt.Sprint(strconv.Itoa(ans)), nil
+
+	secondOperand, err := strconv.Atoi(strings.TrimSpace(res[1]))
+	if err != nil {
+		return "", fmt.Errorf(invalidOperandMsg, err)
+	}
+
+	return strconv.Itoa(firstOperand + secondOperand), nil
 }
